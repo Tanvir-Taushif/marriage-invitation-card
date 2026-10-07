@@ -522,6 +522,13 @@
       color: var(--ink-soft);
       margin-top: 4px;
     }
+    .couple-family {
+      font-size: 17px;
+      color: var(--ink-soft);
+      margin-top: 12px;
+      line-height: 1.6;
+    }
+    .couple-family em { color: var(--gold-ink); }
     .ampersand {
       font-family: var(--f-script);
       font-size: 72px;
@@ -849,7 +856,14 @@
       color: var(--royal-maroon);
       margin-top: 4px;
     }
-    .host-name { font-size: 21px; color: var(--royal-maroon); line-height: 1.7; }
+    .host-name {
+      font-family: var(--f-caps);
+      font-weight: 600;
+      font-size: 18px;
+      letter-spacing: 1.5px;
+      color: var(--royal-maroon);
+      line-height: 1.9;
+    }
     .host-addr { font-size: 16px; color: var(--ink-soft); margin-top: 10px; }
     .hosts-note {
       text-align: center;
@@ -1095,7 +1109,7 @@
         </div>
         <p class="couple-role">The Groom <span class="bn" lang="bn">বর</span></p>
         <h3 class="couple-name">Tanvir Taushif Pial</h3>
-        <!-- Optional: add the groom's parents here, e.g. <p class="couple-nick">Son of Mr. ... &amp; Mrs. ...</p> -->
+        <p class="couple-family"><em>Elder son of</em><br>Md. Abdul Halim &amp; Rehana Parvin</p>
       </div>
 
       <div class="ampersand reveal">&amp;</div>
@@ -1107,7 +1121,7 @@
         </div>
         <p class="couple-role">The Bride <span class="bn" lang="bn">কনে</span></p>
         <h3 class="couple-name">Jannatul Maowa Hridita</h3>
-        <!-- Optional: add the bride's parents here, e.g. <p class="couple-nick">Daughter of Mr. ... &amp; Mrs. ...</p> -->
+        <p class="couple-family"><em>Younger daughter of</em><br>Abul Hashem &amp; Shamima Nasrin</p>
       </div>
     </div>
   </section>
@@ -1124,14 +1138,14 @@
     <div class="hosts-grid">
       <div class="host-card reveal">
         <p class="host-side">Groom's parents <span class="bn" lang="bn">বর পক্ষ</span></p>
-        <p class="host-name bn" lang="bn">[পিতার নাম]</p>
-        <p class="host-name bn" lang="bn">[মাতার নাম]</p>
+        <p class="host-name">Md. Abdul Halim</p>
+        <p class="host-name">Rehana Parvin</p>
         <p class="host-addr bn" lang="bn">[ঠিকানা]</p>
       </div>
       <div class="host-card reveal">
         <p class="host-side">Bride's parents <span class="bn" lang="bn">কনে পক্ষ</span></p>
-        <p class="host-name bn" lang="bn">[পিতার নাম]</p>
-        <p class="host-name bn" lang="bn">[মাতার নাম]</p>
+        <p class="host-name">Abul Hashem</p>
+        <p class="host-name">Shamima Nasrin</p>
         <p class="host-addr bn" lang="bn">[ঠিকানা]</p>
       </div>
     </div>
