@@ -519,12 +519,133 @@
       50%      { filter: drop-shadow(0 12px 26px rgba(31, 78, 110, 0.25)) drop-shadow(0 0 26px rgba(255, 255, 255, 0.95)); }
     }
 
+    /* "Touch to unveil" hint */
+    .unveil-hint {
+      position: absolute;
+      left: 0;
+      right: 0;
+      /* just below the emblem, whatever the screen size */
+      top: calc(50% + clamp(170px, 42vw, 220px) * 0.843 + 56px);
+      z-index: 2;
+      display: flex;
+      justify-content: center;
+      pointer-events: none;
+      transition: opacity 0.6s ease;
+    }
+    .veil.open .unveil-hint { opacity: 0; }
+    .unveil-inner {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      opacity: 0;
+      animation: hintIn 1.2s ease 1.2s forwards;
+    }
+    @keyframes hintIn { to { opacity: 1; } }
+    .tap-ring {
+      position: relative;
+      display: block;
+      flex: none;
+      width: 30px;
+      height: 30px;
+      margin: 0 0 12px;
+      border-radius: 50%;
+      border: 1px solid rgba(255, 255, 255, 0.95);
+      box-shadow: 0 0 12px rgba(255, 255, 255, 0.8);
+    }
+    .tap-ring i {
+      position: absolute;
+      inset: 9px;
+      border-radius: 50%;
+      background: #fff;
+      box-shadow: 0 0 10px rgba(255, 255, 255, 0.9);
+    }
+    .tap-ring::before, .tap-ring::after {
+      content: '';
+      position: absolute;
+      inset: -1px;
+      border-radius: 50%;
+      border: 1px solid rgba(255, 255, 255, 0.9);
+      animation: ringOut 2.4s ease-out infinite;
+    }
+    .tap-ring::after { animation-delay: 1.2s; }
+    @keyframes ringOut {
+      from { transform: scale(1); opacity: 0.9; }
+      to   { transform: scale(2.6); opacity: 0; }
+    }
+    .unveil-en {
+      display: grid;
+      grid-template-columns: 40px auto 40px;   /* equal side ornaments keep the words exactly centred */
+      align-items: center;
+      column-gap: 12px;
+    }
+    .unveil-text {
+      font-family: var(--f-script);
+      font-size: 34px;
+      line-height: 1.2;
+      padding: 0 4px;
+      white-space: nowrap;
+      background: linear-gradient(90deg, var(--navy) 0%, var(--navy) 40%, #ffffff 50%, var(--navy) 60%, var(--navy) 100%);
+      background-size: 250% 100%;
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      animation: shimmerText 3.2s linear infinite;
+      filter: drop-shadow(0 1px 8px rgba(255, 255, 255, 0.95));
+    }
+    @keyframes shimmerText {
+      from { background-position: 100% 0; }
+      to   { background-position: -150% 0; }
+    }
+    .unveil-line {
+      position: relative;
+      width: 40px;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(31, 78, 110, 0.7));
+    }
+    .unveil-line:last-child { transform: scaleX(-1); }
+    .unveil-line::after {
+      content: '';
+      position: absolute;
+      right: -3px;
+      top: -2.5px;
+      width: 6px;
+      height: 6px;
+      background: var(--navy-soft);
+      transform: rotate(45deg);
+    }
+    .veil:focus-visible { outline: none; }
+    .veil:focus-visible .tap-ring { outline: 2px solid #fff; outline-offset: 6px; }
+
+    /* Soft light ripple from where the guest touches */
+    .tap-ripple {
+      position: absolute;
+      width: 20px;
+      height: 20px;
+      margin: -10px 0 0 -10px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(255, 255, 255, 0.9) 0%, rgba(255, 255, 255, 0.35) 40%, rgba(255, 255, 255, 0) 70%);
+      pointer-events: none;
+      z-index: 3;
+      animation: rippleOut 1.4s ease-out forwards;
+    }
+    @keyframes rippleOut {
+      from { transform: scale(1); opacity: 1; }
+      to   { transform: scale(60); opacity: 0; }
+    }
+
+    @media (max-height: 680px) {
+      .veil-emblem { width: 150px; }
+      .unveil-hint { top: calc(50% + 150px * 0.843 + 36px); }
+    }
+
     @media (min-width: 700px) {
       .card-col { box-shadow: 0 0 80px rgba(255, 255, 255, 0.25); }
     }
 
     @media (prefers-reduced-motion: reduce) {
-      #sky, .veil-half canvas, .veil-emblem, .cal-grid .hit svg { animation: none !important; }
+      #sky, .veil-half canvas, .veil-emblem, .cal-grid .hit svg, .tap-ring::before, .tap-ring::after, .unveil-text, .tap-ripple { animation: none !important; }
+      .unveil-inner { opacity: 1; animation: none; }
+      .unveil-text { color: var(--navy); background: none; }
       .frame-anim .draw { stroke-dasharray: none !important; transition: none !important; }
       .frame-anim .fade { opacity: 1 !important; transition: none !important; }
       .veil-half, .veil-sky, .veil-seal, .hero > *, .reveal { transition-duration: 0.01s !important; transition-delay: 0s !important; }
@@ -536,7 +657,7 @@
   <canvas id="sky" aria-hidden="true"></canvas>
 
   <!-- ===== Cloud veil ===== -->
-  <div class="veil" id="veil" aria-hidden="true">
+  <div class="veil" id="veil" role="button" tabindex="0" aria-label="Touch to unveil the invitation">
     <div class="veil-sky"></div>
     <div class="veil-half left"><canvas id="veil-left"></canvas></div>
     <div class="veil-half right"><canvas id="veil-right"></canvas></div>
@@ -599,6 +720,14 @@
           <circle cx="20" cy="130" r="2.6"/><circle cx="220" cy="130" r="2.6"/>
         </g>
       </svg>
+
+    </div>
+
+    <div class="unveil-hint" aria-hidden="true">
+      <div class="unveil-inner">
+        <span class="tap-ring"><i></i></span>
+        <p class="unveil-en"><span class="unveil-line"></span><span class="unveil-text">Tap to Unveil</span><span class="unveil-line"></span></p>
+      </div>
     </div>
   </div>
 
@@ -991,34 +1120,42 @@
     // e.g. const MUSIC_FILE = "music.mp3";  Leave it empty to use the built-in soft tune.
     const MUSIC_FILE = "";
 
-    // Built-in tune: a slow music-box melody over a warm pad, played by the browser itself.
+    // Built-in tune: a soft wedding piece played by the browser itself.
+    // Harp arpeggios over gentle strings, following the classic wedding chord sequence of
+    // Pachelbel's Canon in D (1680, public domain), with its famous slow melody on top.
     const SoftTune = (() => {
       let ctx, master, bus, timer, nextTime = 0, bar = 0, playing = false, stopToken = 0;
-      const beat = 60 / 64;                                  // 64 beats per minute
-      const chords = [[50, 54, 57, 61], [47, 50, 54, 57], [43, 47, 50, 54], [45, 49, 52, 59]]; // Dmaj7, Bm7, Gmaj7, Aadd9
-      const melody = [[66, 69, 73, 74, 76], [66, 69, 71, 74, 78], [66, 67, 71, 74, 78], [64, 69, 71, 73, 76]];
+      const BPM = 70, beat = 60 / BPM, barLen = beat * 4;
+      // [bass note, 3rd (4 = major, 3 = minor)]  D  A  Bm  F#m  G  D  G  A
+      const chords = [[50, 4], [45, 4], [47, 3], [42, 3], [43, 4], [50, 4], [43, 4], [45, 4]];
+      const melodies = [
+        [78, 76, 74, 73, 71, 69, 71, 73],   // F#  E  D  C#  B  A  B  C#
+        [74, 73, 71, 69, 67, 66, 67, 64]    // D   C# B  A   G  F# G  E
+      ];
       const hz = m => 440 * Math.pow(2, (m - 69) / 12);
+      const LEVEL = 1.65;                    // overall balance of the piece (the fade-in level below sets loudness)
 
       function init() {
         ctx = new (window.AudioContext || window.webkitAudioContext)();
         master = ctx.createGain();
         master.gain.value = 0;
         bus = ctx.createGain();
+        bus.gain.value = LEVEL;
 
-        // soft hall reverb made from fading noise
-        const len = Math.floor(ctx.sampleRate * 3.2);
+        // soft chapel-like reverb made from fading noise
+        const len = Math.floor(ctx.sampleRate * 3.8);
         const ir = ctx.createBuffer(2, len, ctx.sampleRate);
         for (let c = 0; c < 2; c++) {
           const d = ir.getChannelData(c);
-          for (let i = 0; i < len; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / len, 2.6);
+          for (let i = 0; i < len; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / len, 2.4);
         }
         const reverb = ctx.createConvolver();
         reverb.buffer = ir;
-        const dry = ctx.createGain(); dry.gain.value = 0.55;
-        const wet = ctx.createGain(); wet.gain.value = 0.6;
+        const dry = ctx.createGain(); dry.gain.value = 0.5;
+        const wet = ctx.createGain(); wet.gain.value = 0.7;
         bus.connect(dry); bus.connect(reverb); reverb.connect(wet);
         dry.connect(master); wet.connect(master);
-        // gentle limiter so the louder mix never distorts on phone speakers
+        // gentle limiter so it never distorts on phone speakers
         const limiter = ctx.createDynamicsCompressor();
         limiter.threshold.value = -10;
         limiter.knee.value = 8;
@@ -1029,53 +1166,94 @@
         limiter.connect(ctx.destination);
       }
 
-      function pad(notes, t, dur) {
-        notes.forEach(m => [-5, 5].forEach(detune => {
+      // plucked harp string: bright start that mellows as it rings
+      function harp(m, t, vol) {
+        const g = ctx.createGain();
+        g.gain.setValueAtTime(0, t);
+        g.gain.linearRampToValueAtTime(vol, t + 0.008);
+        g.gain.exponentialRampToValueAtTime(0.0001, t + 2.6);
+        const lp = ctx.createBiquadFilter();
+        lp.type = "lowpass";
+        lp.frequency.setValueAtTime(3200, t);
+        lp.frequency.exponentialRampToValueAtTime(900, t + 1.2);
+        lp.connect(g); g.connect(bus);
+        [[1, 1], [2, 0.32], [3, 0.12]].forEach(([mult, amp]) => {
           const o = ctx.createOscillator();
-          o.type = "triangle";
+          o.type = "sine";
+          o.frequency.value = hz(m) * mult;
+          const og = ctx.createGain(); og.gain.value = amp;
+          o.connect(og); og.connect(lp);
+          o.start(t); o.stop(t + 2.7);
+        });
+      }
+
+      // soft string section holding the chord
+      function strings(notes, t, dur) {
+        notes.forEach(m => [-6, 6].forEach(detune => {
+          const o = ctx.createOscillator();
+          o.type = "sawtooth";
           o.frequency.value = hz(m);
           o.detune.value = detune;
           const lp = ctx.createBiquadFilter();
           lp.type = "lowpass";
-          lp.frequency.value = 1400;
+          lp.frequency.value = 1100;
+          lp.Q.value = 0.3;
           const g = ctx.createGain();
           g.gain.setValueAtTime(0, t);
-          g.gain.linearRampToValueAtTime(0.045, t + 1.8);
-          g.gain.setValueAtTime(0.045, t + dur - 0.3);
-          g.gain.linearRampToValueAtTime(0, t + dur + 1.4);
+          g.gain.linearRampToValueAtTime(0.0105, t + 1.3);
+          g.gain.setValueAtTime(0.0105, t + dur - 0.2);
+          g.gain.linearRampToValueAtTime(0, t + dur + 1.2);
           o.connect(lp); lp.connect(g); g.connect(bus);
-          o.start(t); o.stop(t + dur + 1.5);
+          o.start(t); o.stop(t + dur + 1.3);
         }));
       }
 
-      function bell(m, t, vol, decay) {
+      // the melody: a soft, breathy flute-like voice with a little vibrato
+      function flute(m, t, dur, vol) {
+        const o = ctx.createOscillator(); o.type = "sine"; o.frequency.value = hz(m);
+        const o2 = ctx.createOscillator(); o2.type = "triangle"; o2.frequency.value = hz(m);
+        const vib = ctx.createOscillator(); vib.frequency.value = 5;
+        const vibAmt = ctx.createGain();
+        vibAmt.gain.setValueAtTime(0, t);
+        vibAmt.gain.linearRampToValueAtTime(hz(m) * 0.004, t + 1.0);
+        vib.connect(vibAmt); vibAmt.connect(o.frequency); vibAmt.connect(o2.frequency);
+        const g2 = ctx.createGain(); g2.gain.value = 0.35;
         const g = ctx.createGain();
         g.gain.setValueAtTime(0, t);
-        g.gain.linearRampToValueAtTime(vol, t + 0.012);
-        g.gain.exponentialRampToValueAtTime(0.0001, t + decay);
-        g.connect(bus);
-        const o1 = ctx.createOscillator(); o1.type = "sine"; o1.frequency.value = hz(m);
-        const o2 = ctx.createOscillator(); o2.type = "sine"; o2.frequency.value = hz(m) * 2;
-        const g2 = ctx.createGain(); g2.gain.value = 0.15;
-        o1.connect(g); o2.connect(g2); g2.connect(g);
-        [o1, o2].forEach(o => { o.start(t); o.stop(t + decay + 0.1); });
+        g.gain.linearRampToValueAtTime(vol, t + 0.35);
+        g.gain.setValueAtTime(vol, t + dur * 0.55);
+        g.gain.exponentialRampToValueAtTime(0.0001, t + dur + 0.6);
+        o.connect(g); o2.connect(g2); g2.connect(g); g.connect(bus);
+        [o, o2, vib].forEach(x => { x.start(t); x.stop(t + dur + 0.7); });
+      }
+
+      // soft low note on each chord change
+      function bass(m, t, dur) {
+        const o = ctx.createOscillator(); o.type = "sine"; o.frequency.value = hz(m);
+        const g = ctx.createGain();
+        g.gain.setValueAtTime(0, t);
+        g.gain.linearRampToValueAtTime(0.09, t + 0.05);
+        g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+        o.connect(g); g.connect(bus);
+        o.start(t); o.stop(t + dur + 0.1);
       }
 
       function scheduleBar(t, n) {
-        const c = n % 4;
-        pad(chords[c].map(n => n + 12), t, beat * 4);   // one octave up so phone speakers can play it
-        const arp = [0, 2, 1, 3];
-        for (let b = 0; b < 4; b++) bell(chords[c][arp[b]] + 24, t + b * beat, 0.04, 1.8);
-        [0, 2].forEach(b => {
-          if (Math.random() < 0.75) {
-            const pool = melody[c];
-            bell(pool[Math.floor(Math.random() * pool.length)], t + b * beat, 0.1, 3.2);
-          }
-        });
+        const i = n % 8;
+        const cycle = Math.floor(n / 8);
+        const [root, third] = chords[i];
+        const r = root + 12;                                     // keep it in a range phone speakers can play
+        bass(root, t, barLen * 0.95);
+        strings([r, r + third, r + 7], t, barLen);
+        // harp: gentle rising and falling arpeggio in eighth notes
+        const arp = [0, 7, 12, 12 + third, 19, 12 + third, 12, 7];
+        arp.forEach((off, k) => harp(r + off, t + k * beat / 2, k === 0 ? 0.075 : 0.055));
+        // melody enters after the first round, then alternates between the two famous lines
+        if (cycle >= 1) flute(melodies[(cycle - 1) % 2][i], t, barLen, 0.07);
       }
 
       function tick() {
-        while (nextTime < ctx.currentTime + 1.2) { scheduleBar(nextTime, bar++); nextTime += beat * 4; }
+        while (nextTime < ctx.currentTime + 1.5) { scheduleBar(nextTime, bar++); nextTime += barLen; }
       }
 
       function start() {
@@ -1088,7 +1266,7 @@
         nextTime = now + 0.15;
         master.gain.cancelScheduledValues(now);
         master.gain.setValueAtTime(master.gain.value, now);
-        master.gain.linearRampToValueAtTime(1, now + 3);     // gentle fade in
+        master.gain.linearRampToValueAtTime(0.5, now + 4);   // gentle fade in (volume: lower = softer)
         tick();
         timer = setInterval(tick, 250);
       }
@@ -1245,11 +1423,23 @@
       setTimeout(() => document.getElementById("hero-frame").classList.add("drawn"), 1500);
       setTimeout(() => veil.remove(), 4200);
     }
-    // A tap on the clouds opens them and starts the music
-    // (browsers only allow sound after the guest touches the page).
-    veil.addEventListener("click", () => { startMusic(); openVeil(); });
-    window.addEventListener("load", () => setTimeout(openVeil, 1800));
-    setTimeout(openVeil, 5500);
+    // The clouds wait for the guest's touch. That same touch starts the music,
+    // which is why it now works on laptops as well as phones.
+    function unveil(x, y) {
+      if (veilOpened) return;
+      startMusic();
+      const r = document.createElement("span");
+      r.className = "tap-ripple";
+      r.style.left = x + "px";
+      r.style.top = y + "px";
+      veil.appendChild(r);
+      openVeil();
+    }
+    veil.addEventListener("click", e => unveil(e.clientX || window.innerWidth / 2, e.clientY || window.innerHeight / 2));
+    veil.addEventListener("keydown", e => {
+      if (e.key === "Enter" || e.key === " ") { e.preventDefault(); unveil(window.innerWidth / 2, window.innerHeight / 2); }
+    });
+    veil.focus({ preventScroll: true });
   </script>
 </body>
 </html>
