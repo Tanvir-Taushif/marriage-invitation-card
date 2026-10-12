@@ -591,12 +591,9 @@
     </div>
   </div>
 
-  <audio id="wedding-audio" loop>
-    <source src="https://actions.google.com/sounds/v1/ambiences/romantic_acoustic_guitar.ogg" type="audio/ogg">
-  </audio>
   <div class="music-widget" onclick="toggleMusic()" role="button" aria-label="Play or pause music">
     <i class="fa-solid fa-compact-disc music-disc" id="music-icon"></i>
-    <span id="music-text">Music</span>
+    <span id="music-text">Play music</span>
   </div>
 
   <main class="card-col">
@@ -792,7 +789,7 @@
             <span class="icon-dot"><i class="fa-solid fa-location-dot"></i></span>
             <div>
               <p class="kicker">From Chandaikona Bazar</p>
-              <p class="bn" lang="bn">অটো বা রিকশায় পূর্বপাড়া।</p>
+              <p class="bn" lang="bn">অটো বা রিকশায় পূর্বপাড়া। নিকটবর্তী চিহ্ন: [ল্যান্ডমার্ক]</p>
             </div>
           </div>
         </div>
@@ -952,21 +949,167 @@
     }, { threshold: 0.15 });
     document.querySelectorAll(".reveal").forEach(el => observer.observe(el));
 
-    // ===== Music =====
-    let isPlaying = false;
-    const audio = document.getElementById("wedding-audio");
+    // ===== Background music =====
+    // To use your own recording instead, put the file next to this page and write its name here,
+    // e.g. const MUSIC_FILE = "music.mp3";  Leave it empty to use the built-in soft tune.
+    const MUSIC_FILE = "";
+
+    // Built-in tune: a slow music-box melody over a warm pad, played by the browser itself.
+    const SoftTune = (() => {
+      let ctx, master, bus, timer, nextTime = 0, bar = 0, playing = false, stopToken = 0;
+      const beat = 60 / 64;                                  // 64 beats per minute
+      const chords = [[50, 54, 57, 61], [47, 50, 54, 57], [43, 47, 50, 54], [45, 49, 52, 59]]; // Dmaj7, Bm7, Gmaj7, Aadd9
+      const melody = [[66, 69, 73, 74, 76], [66, 69, 71, 74, 78], [66, 67, 71, 74, 78], [64, 69, 71, 73, 76]];
+      const hz = m => 440 * Math.pow(2, (m - 69) / 12);
+
+      function init() {
+        ctx = new (window.AudioContext || window.webkitAudioContext)();
+        master = ctx.createGain();
+        master.gain.value = 0;
+        bus = ctx.createGain();
+
+        // soft hall reverb made from fading noise
+        const len = Math.floor(ctx.sampleRate * 3.2);
+        const ir = ctx.createBuffer(2, len, ctx.sampleRate);
+        for (let c = 0; c < 2; c++) {
+          const d = ir.getChannelData(c);
+          for (let i = 0; i < len; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / len, 2.6);
+        }
+        const reverb = ctx.createConvolver();
+        reverb.buffer = ir;
+        const dry = ctx.createGain(); dry.gain.value = 0.55;
+        const wet = ctx.createGain(); wet.gain.value = 0.6;
+        bus.connect(dry); bus.connect(reverb); reverb.connect(wet);
+        dry.connect(master); wet.connect(master);
+        master.connect(ctx.destination);
+      }
+
+      function pad(notes, t, dur) {
+        notes.forEach(m => [-5, 5].forEach(detune => {
+          const o = ctx.createOscillator();
+          o.type = "triangle";
+          o.frequency.value = hz(m);
+          o.detune.value = detune;
+          const lp = ctx.createBiquadFilter();
+          lp.type = "lowpass";
+          lp.frequency.value = 650;
+          const g = ctx.createGain();
+          g.gain.setValueAtTime(0, t);
+          g.gain.linearRampToValueAtTime(0.03, t + 1.8);
+          g.gain.setValueAtTime(0.03, t + dur - 0.3);
+          g.gain.linearRampToValueAtTime(0, t + dur + 1.4);
+          o.connect(lp); lp.connect(g); g.connect(bus);
+          o.start(t); o.stop(t + dur + 1.5);
+        }));
+      }
+
+      function bell(m, t, vol, decay) {
+        const g = ctx.createGain();
+        g.gain.setValueAtTime(0, t);
+        g.gain.linearRampToValueAtTime(vol, t + 0.012);
+        g.gain.exponentialRampToValueAtTime(0.0001, t + decay);
+        g.connect(bus);
+        const o1 = ctx.createOscillator(); o1.type = "sine"; o1.frequency.value = hz(m);
+        const o2 = ctx.createOscillator(); o2.type = "sine"; o2.frequency.value = hz(m) * 2;
+        const g2 = ctx.createGain(); g2.gain.value = 0.15;
+        o1.connect(g); o2.connect(g2); g2.connect(g);
+        [o1, o2].forEach(o => { o.start(t); o.stop(t + decay + 0.1); });
+      }
+
+      function scheduleBar(t, n) {
+        const c = n % 4;
+        pad(chords[c], t, beat * 4);
+        const arp = [0, 2, 1, 3];
+        for (let b = 0; b < 4; b++) bell(chords[c][arp[b]] + 24, t + b * beat, 0.022, 1.8);
+        [0, 2].forEach(b => {
+          if (Math.random() < 0.75) {
+            const pool = melody[c];
+            bell(pool[Math.floor(Math.random() * pool.length)], t + b * beat, 0.055, 3.2);
+          }
+        });
+      }
+
+      function tick() {
+        while (nextTime < ctx.currentTime + 1.2) { scheduleBar(nextTime, bar++); nextTime += beat * 4; }
+      }
+
+      function start() {
+        if (!ctx) init();
+        ctx.resume();
+        if (playing) return;
+        playing = true;
+        stopToken++;
+        const now = ctx.currentTime;
+        nextTime = now + 0.15;
+        master.gain.cancelScheduledValues(now);
+        master.gain.setValueAtTime(master.gain.value, now);
+        master.gain.linearRampToValueAtTime(0.5, now + 3);     // gentle fade in
+        tick();
+        timer = setInterval(tick, 250);
+      }
+
+      function stop() {
+        if (!playing) return;
+        playing = false;
+        clearInterval(timer);
+        const now = ctx.currentTime, token = ++stopToken;
+        master.gain.cancelScheduledValues(now);
+        master.gain.setValueAtTime(master.gain.value, now);
+        master.gain.linearRampToValueAtTime(0, now + 1.2);     // gentle fade out
+        setTimeout(() => { if (token === stopToken) ctx.suspend(); }, 1500);
+      }
+
+      return { start, stop, get playing() { return playing; }, get ctx() { return ctx; } };
+    })();
+
+    // Own recording, if MUSIC_FILE is set
+    const FileTune = (() => {
+      let audio, playing = false, fade;
+      function rampTo(target, ms, done) {
+        clearInterval(fade);
+        const step = (target - audio.volume) / (ms / 50);
+        fade = setInterval(() => {
+          audio.volume = Math.min(1, Math.max(0, audio.volume + step));
+          if ((step >= 0 && audio.volume >= target) || (step < 0 && audio.volume <= target)) {
+            clearInterval(fade); audio.volume = target; if (done) done();
+          }
+        }, 50);
+      }
+      return {
+        start() {
+          if (!audio) { audio = new Audio(MUSIC_FILE); audio.loop = true; audio.volume = 0; }
+          playing = true;
+          return audio.play().then(() => rampTo(0.45, 2500));
+        },
+        stop() { playing = false; rampTo(0, 1000, () => audio.pause()); },
+        get playing() { return playing; }
+      };
+    })();
+
+    const Music = MUSIC_FILE ? FileTune : SoftTune;
     const musicIcon = document.getElementById("music-icon");
     const musicText = document.getElementById("music-text");
-    function toggleMusic() {
-      if (isPlaying) {
-        audio.pause(); isPlaying = false;
-        musicIcon.classList.remove("playing"); musicText.innerText = "Music";
-        return;
-      }
-      audio.play().then(() => {
-        isPlaying = true; musicIcon.classList.add("playing"); musicText.innerText = "Pause";
-      }).catch(() => { musicText.innerText = "Unavailable"; });
+
+    function showMusicState(on) {
+      musicIcon.classList.toggle("playing", on);
+      musicText.innerText = on ? "Pause" : "Play music";
     }
+    function startMusic() {
+      try {
+        const r = Music.start();
+        if (r && r.catch) r.catch(() => showMusicState(false));
+        showMusicState(true);
+      } catch (e) { showMusicState(false); }
+    }
+    function toggleMusic() {
+      if (Music.playing) { Music.stop(); showMusicState(false); }
+      else startMusic();
+    }
+    // pause quietly when the guest switches away, resume when they come back
+    document.addEventListener("visibilitychange", () => {
+      if (MUSIC_FILE || !SoftTune.ctx || !SoftTune.playing) return;
+      if (document.hidden) SoftTune.ctx.suspend(); else SoftTune.ctx.resume();
+    });
 
     // ===== Add to calendar =====
     const EVENT = {
@@ -1026,7 +1169,9 @@
       document.body.classList.remove("veil-active");
       setTimeout(() => veil.remove(), 4200);
     }
-    veil.addEventListener("click", openVeil);
+    // A tap on the clouds opens them and starts the music
+    // (browsers only allow sound after the guest touches the page).
+    veil.addEventListener("click", () => { startMusic(); openVeil(); });
     window.addEventListener("load", () => setTimeout(openVeil, 1800));
     setTimeout(openVeil, 5500);
   </script>
