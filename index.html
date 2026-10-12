@@ -21,6 +21,8 @@
       --sky: #d6e3ed;
       --cloud: #fbf8f2;
       --ink-soft: #46677d;
+      --blush: #e8b4b8;
+      --blush-deep: #d4949b;
 
       --f-sc: 'Cormorant SC', 'Cormorant Garamond', Georgia, serif;
       --f-serif: 'Cormorant Garamond', Georgia, serif;
@@ -83,11 +85,15 @@
     }
     .scallop-top::before {
       top: -16px;
-      background: radial-gradient(circle at 18px 20px, var(--panel) 19px, transparent 19.5px) 0 0 / 36px 16px repeat-x;
+      background:
+        radial-gradient(circle at 18px 7px, rgba(255, 255, 255, 0.95) 0 1.8px, transparent 2.4px) 0 0 / 36px 16px repeat-x,
+        radial-gradient(circle at 18px 20px, var(--panel) 19px, transparent 19.5px) 0 0 / 36px 16px repeat-x;
     }
     .scallop-bottom::after {
       bottom: -16px;
-      background: radial-gradient(circle at 18px -4px, var(--panel) 19px, transparent 19.5px) 0 0 / 36px 16px repeat-x;
+      background:
+        radial-gradient(circle at 18px 9px, rgba(255, 255, 255, 0.95) 0 1.8px, transparent 2.4px) 0 0 / 36px 16px repeat-x,
+        radial-gradient(circle at 18px -4px, var(--panel) 19px, transparent 19.5px) 0 0 / 36px 16px repeat-x;
     }
 
     /* Frosted glass for text sitting on the open sky */
@@ -133,6 +139,31 @@
       margin: 14px auto 0;
     }
     .heart-mark { display: block; margin: 16px auto; width: 14px; height: 13px; }
+
+    /* ===== Satin ribbon on the greeting panel ===== */
+    .ribbon {
+      position: absolute;
+      top: -38px;
+      right: 16px;
+      width: 88px;
+      height: auto;
+      z-index: 2;
+      filter: drop-shadow(0 4px 6px rgba(31, 78, 110, 0.22));
+      pointer-events: none;
+    }
+
+    /* ===== Swans ===== */
+    .swans { display: block; width: 176px; height: auto; margin: 20px auto 6px; overflow: visible; }
+
+    /* ===== Frames that draw themselves ===== */
+    .frame-anim .draw {
+      stroke-dasharray: 1 1;
+      stroke-dashoffset: 1;
+      transition: stroke-dashoffset 2.6s cubic-bezier(0.6, 0.1, 0.3, 1);
+    }
+    .frame-anim .fade { opacity: 0; transition: opacity 1.2s ease 1.5s; }
+    .frame-anim.drawn .draw, .reveal.active .frame-anim .draw { stroke-dashoffset: 0; }
+    .frame-anim.drawn .fade, .reveal.active .frame-anim .fade { opacity: 1; }
 
     /* Thin line ornament */
     .flourish { display: block; width: 150px; height: 18px; margin: 18px auto; }
@@ -341,6 +372,11 @@
       height: 30px;
       transform: translate(-50%, -54%);
       overflow: visible;
+      animation: heartBreath 2.8s ease-in-out infinite;
+    }
+    @keyframes heartBreath {
+      0%, 100% { transform: translate(-50%, -54%) scale(1); }
+      50%      { transform: translate(-50%, -54%) scale(1.09); }
     }
 
     /* ===== Timeline ===== */
@@ -515,7 +551,9 @@
     }
 
     @media (prefers-reduced-motion: reduce) {
-      #sky, .veil-half canvas, .veil-emblem, .music-disc { animation: none !important; }
+      #sky, .veil-half canvas, .veil-emblem, .music-disc, .cal-grid .hit svg { animation: none !important; }
+      .frame-anim .draw { stroke-dasharray: none !important; transition: none !important; }
+      .frame-anim .fade { opacity: 1 !important; transition: none !important; }
       .veil-half, .veil-sky, .veil-seal, .hero > *, .reveal { transition-duration: 0.01s !important; transition-delay: 0s !important; }
     }
   </style>
@@ -603,31 +641,31 @@
       <p class="bismillah ar" lang="ar">بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ</p>
 
       <div class="cartouche">
-        <svg class="frame" viewBox="0 0 300 380" fill="none" stroke="#ffffff" stroke-linecap="round" aria-hidden="true">
-          <ellipse cx="150" cy="190" rx="118" ry="156" stroke-width="2"/>
-          <ellipse cx="150" cy="190" rx="108" ry="146" stroke-width="1" stroke-opacity="0.85"/>
-          <ellipse cx="150" cy="190" rx="100" ry="138" stroke-width="0.8" stroke-dasharray="1.5 4" stroke-opacity="0.9"/>
+        <svg class="frame frame-anim" id="hero-frame" viewBox="0 0 300 380" fill="none" stroke="#ffffff" stroke-linecap="round" aria-hidden="true">
+          <ellipse class="draw" pathLength="1" cx="150" cy="190" rx="118" ry="156" stroke-width="2"/>
+          <ellipse class="draw" pathLength="1" cx="150" cy="190" rx="108" ry="146" stroke-width="1" stroke-opacity="0.85"/>
+          <ellipse class="fade" cx="150" cy="190" rx="100" ry="138" stroke-width="2.2" stroke-dasharray="0 7.5"/>
 
           <g id="crest">
-            <path d="M150 4 C141 16 141 28 150 38 C159 28 159 16 150 4Z" fill="#ffffff" fill-opacity="0.85" stroke-width="1"/>
-            <path d="M150 38 C134 31 116 22 103 29 C92 35 95 50 106 49 C115 48 114 39 107 39" stroke-width="1.6"/>
-            <path d="M150 38 C166 31 184 22 197 29 C208 35 205 50 194 49 C185 48 186 39 193 39" stroke-width="1.6"/>
-            <path d="M126 30 C122 22 124 14 131 12" stroke-width="1"/>
-            <path d="M174 30 C178 22 176 14 169 12" stroke-width="1"/>
-            <ellipse cx="88" cy="40" rx="7" ry="2.6" transform="rotate(-25 88 40)" fill="#ffffff" fill-opacity="0.8" stroke-width="0.8"/>
-            <ellipse cx="212" cy="40" rx="7" ry="2.6" transform="rotate(25 212 40)" fill="#ffffff" fill-opacity="0.8" stroke-width="0.8"/>
-            <circle cx="131" cy="12" r="2" fill="#ffffff"/>
-            <circle cx="169" cy="12" r="2" fill="#ffffff"/>
+            <path class="fade" d="M150 4 C141 16 141 28 150 38 C159 28 159 16 150 4Z" fill="#ffffff" fill-opacity="0.85" stroke-width="1"/>
+            <path class="draw" pathLength="1" d="M150 38 C134 31 116 22 103 29 C92 35 95 50 106 49 C115 48 114 39 107 39" stroke-width="1.6"/>
+            <path class="draw" pathLength="1" d="M150 38 C166 31 184 22 197 29 C208 35 205 50 194 49 C185 48 186 39 193 39" stroke-width="1.6"/>
+            <path class="draw" pathLength="1" d="M126 30 C122 22 124 14 131 12" stroke-width="1"/>
+            <path class="draw" pathLength="1" d="M174 30 C178 22 176 14 169 12" stroke-width="1"/>
+            <ellipse class="fade" cx="88" cy="40" rx="7" ry="2.6" transform="rotate(-25 88 40)" fill="#ffffff" fill-opacity="0.8" stroke-width="0.8"/>
+            <ellipse class="fade" cx="212" cy="40" rx="7" ry="2.6" transform="rotate(25 212 40)" fill="#ffffff" fill-opacity="0.8" stroke-width="0.8"/>
+            <circle class="fade" cx="131" cy="12" r="2.2" fill="#ffffff"/>
+            <circle class="fade" cx="169" cy="12" r="2.2" fill="#ffffff"/>
           </g>
           <use href="#crest" transform="translate(0 380) scale(1 -1)"/>
 
           <g id="side">
-            <path d="M33 146 C17 158 16 176 29 183 C40 188 46 177 39 172" stroke-width="1.6"/>
-            <path d="M33 234 C17 222 16 204 29 197 C40 192 46 203 39 208" stroke-width="1.6"/>
-            <path d="M24 190 C16 186 12 190 14 196" stroke-width="1"/>
-            <ellipse cx="44" cy="120" rx="7" ry="2.6" transform="rotate(-60 44 120)" fill="#ffffff" fill-opacity="0.8" stroke-width="0.8"/>
-            <ellipse cx="44" cy="260" rx="7" ry="2.6" transform="rotate(60 44 260)" fill="#ffffff" fill-opacity="0.8" stroke-width="0.8"/>
-            <circle cx="20" cy="190" r="2.4" fill="#ffffff"/>
+            <path class="draw" pathLength="1" d="M33 146 C17 158 16 176 29 183 C40 188 46 177 39 172" stroke-width="1.6"/>
+            <path class="draw" pathLength="1" d="M33 234 C17 222 16 204 29 197 C40 192 46 203 39 208" stroke-width="1.6"/>
+            <path class="draw" pathLength="1" d="M24 190 C16 186 12 190 14 196" stroke-width="1"/>
+            <ellipse class="fade" cx="44" cy="120" rx="7" ry="2.6" transform="rotate(-60 44 120)" fill="#ffffff" fill-opacity="0.8" stroke-width="0.8"/>
+            <ellipse class="fade" cx="44" cy="260" rx="7" ry="2.6" transform="rotate(60 44 260)" fill="#ffffff" fill-opacity="0.8" stroke-width="0.8"/>
+            <circle class="fade" cx="20" cy="190" r="2.6" fill="#ffffff"/>
           </g>
           <use href="#side" transform="translate(300 0) scale(-1 1)"/>
         </svg>
@@ -652,11 +690,40 @@
 
     <!-- ===== Greeting ===== -->
     <section class="panel scallop-top scallop-bottom">
+      <svg class="ribbon" viewBox="0 0 110 126" aria-hidden="true">
+        <defs>
+          <linearGradient id="satin" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0" stop-color="#ffffff"/>
+            <stop offset="0.55" stop-color="#f7f8fa"/>
+            <stop offset="1" stop-color="#dfe7ee"/>
+          </linearGradient>
+        </defs>
+        <g stroke="rgba(31,78,110,0.22)" stroke-width="0.8" stroke-linejoin="round">
+          <path d="M52 38 C46 62 38 86 26 114 L37 107 L41 121 C50 92 56 64 59 40 Z" fill="url(#satin)"/>
+          <path d="M58 38 C66 63 74 88 89 111 L78 107 L76 121 C66 93 60 65 51 40 Z" fill="url(#satin)"/>
+          <path d="M55 32 C38 6 6 6 8 30 C10 50 40 46 55 32 Z" fill="url(#satin)"/>
+          <path d="M55 32 C72 6 104 6 102 30 C100 50 70 46 55 32 Z" fill="url(#satin)"/>
+          <path d="M20 26 C30 22 42 26 50 31" fill="none" stroke="rgba(232,180,184,0.9)"/>
+          <path d="M90 26 C80 22 68 26 60 31" fill="none" stroke="rgba(232,180,184,0.9)"/>
+          <ellipse cx="55" cy="33" rx="8" ry="9" fill="url(#satin)"/>
+        </g>
+      </svg>
       <div class="reveal">
         <h2 class="title">Dear Family<br>&amp; Friends</h2>
         <p class="bn-sub" lang="bn">প্রিয় আত্মীয়-স্বজন ও বন্ধুরা</p>
         <p class="lead">With the blessings of Almighty Allah, we are happy to invite you to share our wedding day.</p>
-        <svg class="heart-mark" viewBox="0 0 14 13" aria-hidden="true"><path d="M7 12.5 C2 9 0 6.5 0 4 C0 1.8 1.7 0 3.8 0 C5.2 0 6.3 0.8 7 2 C7.7 0.8 8.8 0 10.2 0 C12.3 0 14 1.8 14 4 C14 6.5 12 9 7 12.5Z" fill="#ffffff"/></svg>
+        <svg class="swans frame-anim" viewBox="0 0 160 96" fill="none" stroke="#ffffff" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <g id="swan">
+            <path class="draw" pathLength="1" d="M78 70 C60 60 48 46 52 32 C55 20 70 16 77 26" stroke-width="1.5"/>
+            <path class="draw" pathLength="1" d="M77 28 L80.5 33" stroke-width="1.3"/>
+            <circle class="fade" cx="75.5" cy="26.5" r="2.4" fill="#ffffff" stroke="none"/>
+            <path class="draw" pathLength="1" d="M78 70 C70 80 48 84 30 80 C18 77 10 70 6 60 C16 66 26 66 34 62 C46 56 64 60 78 70" stroke-width="1.5"/>
+            <path class="draw" pathLength="1" d="M30 71 C42 65 56 65 66 72" stroke-width="0.9"/>
+          </g>
+          <use href="#swan" transform="translate(160 0) scale(-1 1)"/>
+          <path class="draw" pathLength="1" d="M14 89 C34 85 54 93 80 89 C106 85 126 93 146 89" stroke-width="0.9" stroke-opacity="0.75"/>
+          <path class="fade" transform="translate(73 42)" d="M7 12.5 C2 9 0 6.5 0 4 C0 1.8 1.7 0 3.8 0 C5.2 0 6.3 0.8 7 2 C7.7 0.8 8.8 0 10.2 0 C12.3 0 14 1.8 14 4 C14 6.5 12 9 7 12.5Z" fill="#e8b4b8" stroke="none"/>
+        </svg>
         <p class="verse-ar ar" lang="ar">وَمِنْ آيَاتِهِ أَنْ خَلَقَ لَكُم مِّنْ أَنفُسِكُمْ أَزْوَاجًا لِّتَسْكُنُوا إِلَيْهَا وَجَعَلَ بَيْنَكُم مَّوَدَّةً وَرَحْمَةً</p>
         <p class="verse-bn" lang="bn">আর তাঁর নিদর্শনাবলীর মধ্যে রয়েছে যে, তিনি তোমাদের মধ্য থেকেই তোমাদের জন্য জীবনসঙ্গী সৃষ্টি করেছেন, যাতে তোমরা তাদের কাছে প্রশান্তি পাও, এবং তিনি তোমাদের মাঝে ভালোবাসা ও দয়া সৃষ্টি করেছেন।</p>
         <p class="kicker verse-ref">Surah Ar-Rum 30:21</p>
@@ -688,16 +755,17 @@
     <!-- ===== Date ===== -->
     <section class="on-sky" style="padding-top: 30px;">
       <div class="arch-frame reveal">
-        <svg viewBox="0 0 300 440" fill="none" stroke="#ffffff" stroke-linecap="round" aria-hidden="true">
-          <g fill="#ffffff">
+        <svg class="frame-anim" viewBox="0 0 300 440" fill="none" stroke="#ffffff" stroke-linecap="round" aria-hidden="true">
+          <g class="fade" fill="#ffffff">
             <path d="M150 0 L155 12 L150 24 L145 12 Z"/>
             <circle cx="150" cy="31" r="5"/>
             <path d="M140 40 Q150 33 160 40 L155 45 H145 Z"/>
           </g>
-          <path d="M14 436 V170 C14 92 112 80 150 46 C188 80 286 92 286 170 V436 Z" fill="#ffffff" fill-opacity="0.42" stroke-width="2"/>
-          <path d="M26 424 V174 C26 102 118 92 150 62 C182 92 274 102 274 174 V424 Z" stroke-width="1" stroke-opacity="0.9"/>
-          <path d="M34 416 V177 C34 109 122 100 150 74 C178 100 266 109 266 177 V416 Z" stroke-width="0.8" stroke-dasharray="1.5 4"/>
-          <g fill="#ffffff">
+          <path d="M14 436 V170 C14 92 112 80 150 46 C188 80 286 92 286 170 V436 Z" fill="#ffffff" fill-opacity="0.42" stroke="none"/>
+          <path class="draw" pathLength="1" d="M14 436 V170 C14 92 112 80 150 46 C188 80 286 92 286 170 V436 Z" stroke-width="2"/>
+          <path class="draw" pathLength="1" d="M26 424 V174 C26 102 118 92 150 62 C182 92 274 102 274 174 V424 Z" stroke-width="1" stroke-opacity="0.9"/>
+          <path class="fade" d="M34 416 V177 C34 109 122 100 150 74 C178 100 266 109 266 177 V416 Z" stroke-width="2" stroke-dasharray="0 7.5"/>
+          <g class="fade" fill="#ffffff">
             <circle cx="14" cy="436" r="3.5"/><circle cx="286" cy="436" r="3.5"/>
             <circle cx="14" cy="170" r="3"/><circle cx="286" cy="170" r="3"/>
           </g>
@@ -722,14 +790,14 @@
         <p class="bn-sub" lang="bn">অনুষ্ঠানসূচি</p>
 
         <div class="tl">
-          <svg class="heart-mark" viewBox="0 0 14 13" aria-hidden="true"><path d="M7 12.5 C2 9 0 6.5 0 4 C0 1.8 1.7 0 3.8 0 C5.2 0 6.3 0.8 7 2 C7.7 0.8 8.8 0 10.2 0 C12.3 0 14 1.8 14 4 C14 6.5 12 9 7 12.5Z" fill="#ffffff"/></svg>
+          <svg class="heart-mark" viewBox="0 0 14 13" aria-hidden="true"><path d="M7 12.5 C2 9 0 6.5 0 4 C0 1.8 1.7 0 3.8 0 C5.2 0 6.3 0.8 7 2 C7.7 0.8 8.8 0 10.2 0 C12.3 0 14 1.8 14 4 C14 6.5 12 9 7 12.5Z" fill="#e8b4b8"/></svg>
           <p class="tl-time">Jumu'ah</p>
           <p class="tl-label">Friday prayer</p>
           <p class="tl-bn" lang="bn">জুম'আর নামাজ</p>
 
           <div class="tl-line"></div>
 
-          <svg class="heart-mark" viewBox="0 0 14 13" aria-hidden="true"><path d="M7 12.5 C2 9 0 6.5 0 4 C0 1.8 1.7 0 3.8 0 C5.2 0 6.3 0.8 7 2 C7.7 0.8 8.8 0 10.2 0 C12.3 0 14 1.8 14 4 C14 6.5 12 9 7 12.5Z" fill="#ffffff"/></svg>
+          <svg class="heart-mark" viewBox="0 0 14 13" aria-hidden="true"><path d="M7 12.5 C2 9 0 6.5 0 4 C0 1.8 1.7 0 3.8 0 C5.2 0 6.3 0.8 7 2 C7.7 0.8 8.8 0 10.2 0 C12.3 0 14 1.8 14 4 C14 6.5 12 9 7 12.5Z" fill="#e8b4b8"/></svg>
           <p class="tl-time">After Jumu'ah</p>
           <p class="tl-label">Marriage ceremony</p>
           <p class="tl-bn" lang="bn">বাদ জুম'আ, শুভ বিবাহ</p>
@@ -815,7 +883,7 @@
           <path d="M218 26 C190 26 180 14 158 18 C142 21 140 30 128 28"/>
           <circle cx="102" cy="22" r="11"/>
           <circle cx="118" cy="22" r="11"/>
-          <path d="M98 10 L102 6 L106 10" stroke-width="1.1"/>
+          <path transform="translate(104 0) scale(0.86)" d="M7 12.5 C2 9 0 6.5 0 4 C0 1.8 1.7 0 3.8 0 C5.2 0 6.3 0.8 7 2 C7.7 0.8 8.8 0 10.2 0 C12.3 0 14 1.8 14 4 C14 6.5 12 9 7 12.5Z" fill="#e8b4b8" stroke="none"/>
         </svg>
 
         <div class="hashtag">#PialWedsHridita</div>
@@ -937,7 +1005,7 @@
         if (d === 30) {
           cell.className = "hit";
           cell.insertAdjacentHTML("beforeend",
-            '<svg viewBox="0 0 32 30" fill="none" stroke="#1f4e6e" stroke-width="1.1"><path d="M16 28 C6 21 1.5 15.5 1.5 9.5 C1.5 5 5 1.5 9.2 1.5 C12.2 1.5 14.6 3.2 16 5.8 C17.4 3.2 19.8 1.5 22.8 1.5 C27 1.5 30.5 5 30.5 9.5 C30.5 15.5 26 21 16 28Z"/></svg>');
+            '<svg viewBox="0 0 32 30" fill="rgba(232,180,184,0.35)" stroke="#d4949b" stroke-width="1.3"><path d="M16 28 C6 21 1.5 15.5 1.5 9.5 C1.5 5 5 1.5 9.2 1.5 C12.2 1.5 14.6 3.2 16 5.8 C17.4 3.2 19.8 1.5 22.8 1.5 C27 1.5 30.5 5 30.5 9.5 C30.5 15.5 26 21 16 28Z"/></svg>');
         }
         grid.appendChild(cell);
       }
@@ -1167,6 +1235,7 @@
       veilOpened = true;
       veil.classList.add("open");
       document.body.classList.remove("veil-active");
+      setTimeout(() => document.getElementById("hero-frame").classList.add("drawn"), 1500);
       setTimeout(() => veil.remove(), 4200);
     }
     // A tap on the clouds opens them and starts the music
